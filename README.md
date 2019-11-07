@@ -35,6 +35,8 @@ model.add_edges_from([('Genetics', 'Performance'), ('Performance', 'offer'), ('P
 ### Watching how your network looks
 
 import networkx as nx
+
+
 nx.draw_networkx(model)
 
 ![git2](https://user-images.githubusercontent.com/52886443/68380618-32e72800-0176-11ea-939d-8d3632618d00.png)
