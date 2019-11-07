@@ -1,0 +1,80 @@
+print('welcome to PGM tutorial')
+
+# importing required libraries
+from pgmpy.factors.discrete import TabularCPD
+from pgmpy.models import BayesianModel
+import networkx as nx
+import matplotlib.pyplot as plt
+
+# first set the structure of your graph while directly initialising your model
+model = BayesianModel([('Genetic', 'Performance'),
+                       ('Practice', 'Performance'),
+                       ('Performance', 'Offer')])
+                       
+nx.draw_networkx(model)
+# now if you have data then you can fit it else write out the cpd  individually
+genetic_cpd = TabularCPD( variable = 'Genetic', 
+                        variable_card = 2,
+                        values = [[.2, .8]])
+                        
+
+performance_cpd = TabularCPD( variable = 'Performance',
+                           variable_card = 3,
+                           values = [[.5, .8, .8, .9],
+                                    [.3, .15, .1, .08],
+                                    [.2, .05, .1, .02]],
+                           evidence = ['Genetic', 'Practice'],
+                           evidence_card = [2,2])
+practice_cpd = TabularCPD( variable = 'Practice', 
+                         variable_card = 2,
+                         values = [[.7, .3]])
+
+offer_cpd = TabularCPD(variable = 'Offer',
+                      variable_card = 2,
+                      values = [[.95, .8, .5],
+                               [.05, .2, .5]],
+                      evidence = ['Performance'],
+                      evidence_card = [3])
+print(performance_cpd)
+
+model.add_cpds(genetic_cpd,
+               performane_cpd,
+               practice_cpd, 
+               offer_cpd)
+# to check if each node is associated with cpds or not
+model.check_model()
+
+# to get the cpd of each model
+model.get_cpds()
+
+print(model.get_cpds('Offer'))
+
+# tells the nodes on which selected node is dependent
+
+model.active_trail_nodes('Genetic', observed = None)
+
+# tells if our moddel has any independent item with refrence to the selected item
+
+model.local_independencies('Genetic')
+
+# tells all the local independencies
+
+model.get_independencies()
+
+# making inference
+
+from pgmpy.inference import VariableElimination
+
+infer = VariableElimination(model)
+
+infer_offer = infer.query(variables = ['Offer'])
+print(infer_offer['Offer'])
+
+# probability of player with bad gene (1) gettinng into team
+
+offer_genetics_false = infer.query(variables = ['Offer'],
+                                   evidence = {'Genetic':1})
+
+
+print(offer_genetics_false['Offer'])
+
